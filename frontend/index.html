@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Task Manager</title>
+
+  <!-- Google Fonts: Clash Display + Satoshi feel via Syne + Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ── Ambient background orbs ── -->
+  <div class="bg-orb orb-1" aria-hidden="true"></div>
+  <div class="bg-orb orb-2" aria-hidden="true"></div>
+  <div class="bg-orb orb-3" aria-hidden="true"></div>
+
+  <!-- ══════════════════════════════════════════════
+       SIDEBAR
+  ══════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="8" height="8" rx="2"/>
+          <rect x="13" y="3" width="8" height="8" rx="2"/>
+          <rect x="3" y="13" width="8" height="8" rx="2"/>
+          <path d="M17 13v2m0 4v-2m0 0h-2m2 0h2"/>
+        </svg>
+      </div>
+      <span class="brand-name">TaskFlow</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-filter="all">
+        <span class="nav-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm0 8a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2z"/></svg>
+        </span>
+        All Tasks
+        <span class="nav-badge" id="badge-all">0</span>
+      </button>
+      <button class="nav-item" data-filter="pending">
+        <span class="nav-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5" stroke-linecap="round"/></svg>
+        </span>
+        Pending
+        <span class="nav-badge pending" id="badge-pending">0</span>
+      </button>
+      <button class="nav-item" data-filter="completed">
+        <span class="nav-icon">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M6.5 10l2.5 2.5 4.5-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Completed
+        <span class="nav-badge done" id="badge-done">0</span>
+      </button>
+
+      <div class="nav-divider"></div>
+
+      <button class="nav-item" data-filter="high">
+        <span class="nav-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l4 4a1 1 0 01-1.414 1.414L11 6.414V16a1 1 0 11-2 0V6.414L6.707 8.707A1 1 0 015.293 7.293l4-4A1 1 0 0110 3z" clip-rule="evenodd"/></svg>
+        </span>
+        High Priority
+        <span class="nav-badge high" id="badge-high">0</span>
+      </button>
+      <button class="nav-item" data-filter="medium">
+        <span class="nav-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+        </span>
+        Medium Priority
+        <span class="nav-badge medium" id="badge-medium">0</span>
+      </button>
+      <button class="nav-item" data-filter="low">
+        <span class="nav-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 17a1 1 0 01-.707-.293l-4-4a1 1 0 011.414-1.414L9 13.586V4a1 1 0 112 0v9.586l2.293-2.293a1 1 0 011.414 1.414l-4 4A1 1 0 0110 17z" clip-rule="evenodd"/></svg>
+        </span>
+        Low Priority
+        <span class="nav-badge low" id="badge-low">0</span>
+      </button>
+    </nav>
+
+    <!-- API Status -->
+    <div class="sidebar-footer">
+      <div class="api-pill" id="api-pill">
+        <span class="api-dot"></span>
+        <span id="api-pill-text">Connecting…</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ══════════════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5h14a1 1 0 010 2H3a1 1 0 010-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2zm0 4h14a1 1 0 010 2H3a1 1 0 010-2z" clip-rule="evenodd"/></svg>
+        </button>
+        <div>
+          <h1 class="page-title" id="page-title">All Tasks</h1>
+          <p class="page-sub" id="page-sub">Loading…</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Search tasks…" autocomplete="off" />
+          <button class="search-clear" id="search-clear" aria-label="Clear search">×</button>
+        </div>
+        <select class="sort-select" id="sort-select">
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="alpha">A → Z</option>
+          <option value="priority">Priority</option>
+        </select>
+        <button class="btn btn-primary" id="open-modal-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+          Add Task
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Strip -->
+    <section class="stats-strip" id="stats-strip">
+      <div class="stat-card">
+        <div class="stat-icon total-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <div class="stat-value" id="s-total">—</div>
+          <div class="stat-label">Total Tasks</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon done-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <div class="stat-value done-val" id="s-done">—</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pend-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <div class="stat-value pend-val" id="s-pending">—</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon prog-icon">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11 4a1 1 0 10-2 0v4a1 1 0 102 0V7zm-3 1a1 1 0 10-2 0v3a1 1 0 102 0V8zM8 9a1 1 0 00-2 0v2a1 1 0 102 0V9z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <div class="stat-value prog-val" id="s-progress">—%</div>
+          <div class="stat-label">Progress</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Task List -->
+    <section class="task-section">
+      <div class="task-grid" id="task-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════════
+       ADD / EDIT MODAL
+  ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="task-modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-heading">New Task</h2>
+        <button class="modal-close" id="modal-close" aria-label="Close">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="edit-task-id" />
+
+        <div class="field-group">
+          <label class="field-label" for="task-title">Title <span class="required">*</span></label>
+          <input class="field-input" type="text" id="task-title" placeholder="What needs to be done?" autocomplete="off" />
+          <span class="field-error" id="title-error"></span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="task-description">Description</label>
+          <textarea class="field-input field-textarea" id="task-description" placeholder="Add details, notes, or context…"></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="task-priority">Priority</label>
+            <select class="field-input field-select" id="task-priority">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="task-completed">Status</label>
+            <select class="field-input field-select" id="task-completed">
+              <option value="false">⏳ Pending</option>
+              <option value="true">✅ Completed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+        <button class="btn btn-primary" id="modal-save">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+          Save Task
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       DELETE CONFIRM MODAL
+  ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="delete-modal" role="dialog" aria-modal="true">
+    <div class="modal-box modal-box--sm">
+      <div class="delete-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+      </div>
+      <h3 class="delete-title">Delete this task?</h3>
+      <p class="delete-sub">This is permanent and cannot be undone.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="delete-cancel">Keep it</button>
+        <button class="btn btn-danger" id="delete-confirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       TOAST CONTAINER
+  ══════════════════════════════════════════════ -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- App Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>
